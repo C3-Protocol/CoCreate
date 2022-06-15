@@ -1,0 +1,29 @@
+{
+  "canisters": {
+    "ICCreateFactory": {
+      "main": "src/factory/NFTFactory.mo",
+      "type": "motoko"
+    },
+    "ICCollection": {
+      "main": "src/NFT/NFT.mo",
+      "type": "motoko"
+    }
+  },
+  "defaults": {
+    "build": {
+      "packtool": ""
+    }
+  },
+  "dfx": "0.9.3",
+  "networks": {
+    "local": {
+      "bind": "127.0.0.1:8000",
+      "type": "ephemeral"
+    },
+    "dev": {
+      "bind": "127.0.0.1:8001",
+      "type": "ephemeral"
+    }
+  },
+  "version": 1
+}
