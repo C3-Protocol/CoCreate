@@ -246,6 +246,59 @@ shared(msg)  actor class NFT (paramInfo: Types.CollectionParamInfo, owner_: Prin
         allSaleRecord := List.push(saleRecord, allSaleRecord);
     };
 
+    public shared(msg) func uploadICItem(newItem: NewItem) : async MintResponse {
+        if(owner != msg.caller and (not bPublic) ){ return #err(#NotOwner); };
+        if(newItem.name.size() > 20 or newItem.desc.size() > 2000){
+                return #err(#ParamError);
+        };
+        
+        let transferResult = await WICPCanisterActor.transferFrom(msg.caller, feeTo, collectionSettings.uploadProtocolBaseFee);
+        switch(transferResult){
+            case(#ok(b)) {};
+            case(#err(errText)){
+                return #err(errText);
+            };
+        }; 
+
+        let index = glIndex;
+        orignData[glIndex] := newItem.orignData;
+        switch(newItem.thumbnailData){
+            case(?data){thumbnailData[glIndex] := data;};
+            case _ {};
+        };
+
+        var comIndexArr = Buffer.Buffer<Nat>(0);
+        for(attr in newItem.attrArr.vals()){
+            switch(componentsRev.get(attr)){
+                case (?i){comIndexArr.add(i)};
+                case _ {
+                    componentsRev.put(attr, attrIndex);
+                    components.put(attrIndex, attr);
+                    comIndexArr.add(attrIndex);
+                    attrIndex += 1;
+                };
+            };
+        };
+        let data: NFTMetaData = {
+            parentToken = newItem.parentToken;
+            index = glIndex;
+            name = newItem.name;
+            desc = newItem.desc;
+            photoLink = null;
+            videoLink = null;
+            royaltyRatio = newItem.earnings;
+            royaltyFeeTo = newItem.royaltyFeeTo;
+            attrIds = comIndexArr.toArray();
+        };
+        tokens.put(glIndex, data);
+
+        owners.put(glIndex, msg.caller);
+        _addRecord(glIndex, #Mint, null, ?msg.caller, null, Time.now());
+        glIndex += 1;
+
+        return #ok(index);
+    };
+
     public shared(msg) func uploadIPFSItem(newItem: NewIPFSItem) : async MintResponse {
         if(owner != msg.caller and tokens.size() == 0){ 
             return #err(#NotOwner);

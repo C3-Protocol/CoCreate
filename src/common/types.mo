@@ -138,11 +138,12 @@ module Types = {
   };
 
   public type NewItem = {
+    parentToken: ?TokenIndex;
     name: Text;
     desc: Text;
     orignData: Blob;
-    earnings: ?Nat;
-    royalty: ?Principal;
+    earnings: Nat;
+    royaltyFeeTo: Principal;
     thumbnailData: ?Blob;
     attrArr: [ComponentAttribute];
   };
